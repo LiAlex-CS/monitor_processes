@@ -1,5 +1,4 @@
 import { DeviceDetails, TotalSystemData } from "../hooks/useSystemQuery";
-import { getPercentage } from "../services/getPercentage";
 import { getStorageUnits } from "../services/getStorageUnits";
 import Container from "./Container";
 
@@ -35,13 +34,6 @@ const Header = ({ deviceDetails, totalSystemData }: HeaderProps) => {
         <Stat
           label="Used Memory"
           stat={getStorageUnits(totalSystemData.used_memory)}
-        />
-        <Stat
-          label="Used Memory Percentage"
-          stat={getPercentage(
-            totalSystemData.used_memory,
-            totalSystemData.total_memory
-          )}
         />
       </div>
     </Container>

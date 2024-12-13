@@ -15,5 +15,5 @@ export const getStorageUnits = (storageInBytes: number) => {
     const convertedStorage = storageInBytes / 10 ** 3;
     return `${convertedStorage.toFixed(3)} KB`;
   }
-  return storageInBytes.toFixed(3) + "B";
+  return `${storageInBytes.toFixed(3)} B`;
 };
