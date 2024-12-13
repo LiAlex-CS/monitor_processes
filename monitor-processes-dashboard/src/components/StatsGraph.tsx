@@ -1,19 +1,15 @@
 import { XAxis, YAxis, ResponsiveContainer, AreaChart, Area } from "recharts";
 import Container from "./Container";
-
-export type GraphData = {
-  x: string | number;
-  y: number;
-};
+import { BufferStamp } from "../hooks/useSystemQuery";
 
 type StatsGraphProps = {
   header: string;
   currentValue: string | number;
-  data: GraphData[];
+  data: BufferStamp[];
 };
 
 const StatsGraph = ({ header, currentValue, data }: StatsGraphProps) => {
-  const lastElementX = data[data.length - 1].x;
+  const lastElementX = data[data.length - 1].date_time;
 
   return (
     <Container>
@@ -23,27 +19,24 @@ const StatsGraph = ({ header, currentValue, data }: StatsGraphProps) => {
         </h2>
       </div>
       <div className="h-96">
-        <ResponsiveContainer
-          width="100%"
-          height="100%"
-          key={`rc_${lastElementX}`}
-        >
-          <AreaChart data={data}>
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data} key={`rc_${lastElementX}`}>
             <defs>
               <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
                 <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <XAxis dataKey="x" />
+            <XAxis dataKey="date_time" />
             <YAxis />
             <Area
               type="monotone"
-              dataKey="y"
+              dataKey="usage_percentage"
               stroke="#8884d8"
               fillOpacity={1}
               fill="url(#colorUv)"
               isAnimationActive={false}
+              key={`rc_${lastElementX}`}
             />
           </AreaChart>
         </ResponsiveContainer>

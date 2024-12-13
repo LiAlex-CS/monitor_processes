@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { useCircularBuffer } from "./useCircularBuffer";
-import { GraphData } from "../components/StatsGraph";
 
 export type DeviceDetails = {
   architecture: string;
@@ -24,51 +22,31 @@ export type ProcessData = {
   disk_usage: number;
 };
 
+type Buffer = {
+  content: BufferStamp[];
+  max_length: number;
+};
+
+export type BufferStamp = {
+  date_time: string;
+  usage_percentage: number;
+};
+
 type SystemQuery = {
   date_time: string;
   device_details: DeviceDetails;
   total_system_data: TotalSystemData;
   processes_data: ProcessData[];
-};
-
-const dateFilter = (systemQuery: SystemQuery) => {
-  return systemQuery.date_time;
-};
-
-const cpuUsageFilter = (systemQuery: SystemQuery) => {
-  return systemQuery.total_system_data.global_cpu_usage;
-};
-
-const memoryUsageFilter = (systemQuery: SystemQuery) => {
-  return parseFloat(
-    (
-      (systemQuery.total_system_data.used_memory /
-        systemQuery.total_system_data.total_memory) *
-      100
-    ).toFixed(2)
-  );
-};
-
-const getGraphData = (x: string | number, y: number) => {
-  const res: GraphData = {
-    x: x,
-    y: y,
-  };
-  return res;
-};
-
-type SystemQueryWithBuffers = {
-  systemQuery: SystemQuery | undefined;
-  cpuUsageBuffer: GraphData[];
-  memoryUsageBuffer: GraphData[];
+  cpu_usage_buffer: Buffer;
+  memory_usage_buffer: Buffer;
 };
 
 export const useSystemQuery = (webSocketPath = "ws://127.0.0.1:8080") => {
   const [data, setData] = useState<SystemQuery | undefined>();
-  const [cpuUsageBuffer, addToCpuUsageBuffer] =
-    useCircularBuffer<GraphData>(100);
-  const [memoryUsageBuffer, addToMemoryUsageBuffer] =
-    useCircularBuffer<GraphData>(100);
+  // const [cpuUsageBuffer, addToCpuUsageBuffer] =
+  //   useCircularBuffer<GraphData>(100);
+  // const [memoryUsageBuffer, addToMemoryUsageBuffer] =
+  //   useCircularBuffer<GraphData>(100);
 
   useEffect(() => {
     const ws = new WebSocket(webSocketPath);
@@ -81,18 +59,18 @@ export const useSystemQuery = (webSocketPath = "ws://127.0.0.1:8080") => {
       // console.log("Message received:", event.data);
       const parsedSystemQuery = JSON.parse(event.data) as SystemQuery;
       setData(parsedSystemQuery);
-      addToCpuUsageBuffer(
-        getGraphData(
-          dateFilter(parsedSystemQuery),
-          cpuUsageFilter(parsedSystemQuery)
-        )
-      );
-      addToMemoryUsageBuffer(
-        getGraphData(
-          dateFilter(parsedSystemQuery),
-          memoryUsageFilter(parsedSystemQuery)
-        )
-      );
+      // addToCpuUsageBuffer(
+      //   getGraphData(
+      //     dateFilter(parsedSystemQuery),
+      //     cpuUsageFilter(parsedSystemQuery)
+      //   )
+      // );
+      // addToMemoryUsageBuffer(
+      //   getGraphData(
+      //     dateFilter(parsedSystemQuery),
+      //     memoryUsageFilter(parsedSystemQuery)
+      //   )
+      // );
     };
 
     ws.onerror = (error) => {
@@ -108,11 +86,5 @@ export const useSystemQuery = (webSocketPath = "ws://127.0.0.1:8080") => {
     };
   }, []);
 
-  const res: SystemQueryWithBuffers = {
-    systemQuery: data,
-    cpuUsageBuffer: cpuUsageBuffer,
-    memoryUsageBuffer: memoryUsageBuffer,
-  };
-
-  return res;
+  return data;
 };

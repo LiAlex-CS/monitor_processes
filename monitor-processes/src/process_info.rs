@@ -19,9 +19,9 @@ pub struct ProcessData {
 #[derive(Debug, Serialize)]
 pub struct TotalProcessesData {
     cores: usize,
-    total_memory: u64,
-    used_memory: u64,
-    global_cpu_usage: f64,
+    pub total_memory: u64,
+    pub used_memory: u64,
+    pub global_cpu_usage: f64,
 }
 
 impl SystemQuery {

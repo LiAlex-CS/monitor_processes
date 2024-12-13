@@ -1,41 +1,43 @@
 import Header from "./components/Header";
+import ProcessesTable from "./components/ProcessesTable";
 import StatsGraph from "./components/StatsGraph";
 import { useSystemQuery } from "./hooks/useSystemQuery";
 import { getPercentage } from "./services/getPercentage";
 
 const App = () => {
-  const systemQueryInfo = useSystemQuery();
+  const systemQuery = useSystemQuery();
 
-  if (!systemQueryInfo.systemQuery) {
+  if (!systemQuery) {
     return (
       <div>
         <h1 className="text-3xl font-bold">Loading</h1>
       </div>
     );
   }
-  console.log(systemQueryInfo.cpuUsageBuffer);
+
   return (
-    <div className="w-screen h-screen p-3">
+    <div className="p-3">
       <Header
-        deviceDetails={systemQueryInfo.systemQuery.device_details}
-        totalSystemData={systemQueryInfo.systemQuery.total_system_data}
+        deviceDetails={systemQuery.device_details}
+        totalSystemData={systemQuery.total_system_data}
       />
       <StatsGraph
-        data={systemQueryInfo.cpuUsageBuffer}
+        data={systemQuery.cpu_usage_buffer.content}
         header="Global CPU Usage"
         currentValue={getPercentage(
-          systemQueryInfo.systemQuery.total_system_data.global_cpu_usage,
+          systemQuery.total_system_data.global_cpu_usage,
           100
         )}
       />
       <StatsGraph
-        data={systemQueryInfo.memoryUsageBuffer}
+        data={systemQuery.memory_usage_buffer.content}
         header="Global Memory Usage"
         currentValue={getPercentage(
-          systemQueryInfo.systemQuery.total_system_data.used_memory,
-          systemQueryInfo.systemQuery.total_system_data.total_memory
+          systemQuery.total_system_data.used_memory,
+          systemQuery.total_system_data.total_memory
         )}
       />
+      <ProcessesTable data={systemQuery.processes_data} />
     </div>
   );
 };
