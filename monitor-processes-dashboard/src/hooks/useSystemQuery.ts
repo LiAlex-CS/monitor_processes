@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type DeviceDetails = {
   architecture: string;
@@ -15,7 +15,7 @@ export type TotalSystemData = {
 };
 
 export type ProcessData = {
-  pid: string;
+  pid: number;
   process_path: string;
   cpu_usage: number;
   memory: number;
@@ -32,6 +32,14 @@ export type BufferStamp = {
   usage_percentage: number;
 };
 
+export type Order = "asc" | "desc";
+
+export type TableConfig = {
+  order_by: keyof ProcessData;
+  order: Order;
+  page: number;
+};
+
 type SystemQuery = {
   date_time: string;
   device_details: DeviceDetails;
@@ -39,14 +47,13 @@ type SystemQuery = {
   processes_data: ProcessData[];
   cpu_usage_buffer: Buffer;
   memory_usage_buffer: Buffer;
+  table_config: TableConfig;
 };
 
 export const useSystemQuery = (webSocketPath = "ws://127.0.0.1:8080") => {
   const [data, setData] = useState<SystemQuery | undefined>();
-  // const [cpuUsageBuffer, addToCpuUsageBuffer] =
-  //   useCircularBuffer<GraphData>(100);
-  // const [memoryUsageBuffer, addToMemoryUsageBuffer] =
-  //   useCircularBuffer<GraphData>(100);
+
+  const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     const ws = new WebSocket(webSocketPath);
@@ -56,21 +63,8 @@ export const useSystemQuery = (webSocketPath = "ws://127.0.0.1:8080") => {
     };
 
     ws.onmessage = (event) => {
-      // console.log("Message received:", event.data);
       const parsedSystemQuery = JSON.parse(event.data) as SystemQuery;
       setData(parsedSystemQuery);
-      // addToCpuUsageBuffer(
-      //   getGraphData(
-      //     dateFilter(parsedSystemQuery),
-      //     cpuUsageFilter(parsedSystemQuery)
-      //   )
-      // );
-      // addToMemoryUsageBuffer(
-      //   getGraphData(
-      //     dateFilter(parsedSystemQuery),
-      //     memoryUsageFilter(parsedSystemQuery)
-      //   )
-      // );
     };
 
     ws.onerror = (error) => {
@@ -81,10 +75,19 @@ export const useSystemQuery = (webSocketPath = "ws://127.0.0.1:8080") => {
       console.log("WebSocket connection closed");
     };
 
+    wsRef.current = ws;
+
     return () => {
       ws.close();
     };
   }, []);
 
-  return data;
+  const res: [
+    SystemQuery | undefined,
+    (
+      | ((data: string | ArrayBufferLike | Blob | ArrayBufferView) => void)
+      | undefined
+    )
+  ] = [data, wsRef.current?.send.bind(wsRef.current)];
+  return res;
 };
