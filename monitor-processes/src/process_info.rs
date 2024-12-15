@@ -9,11 +9,11 @@ pub struct SystemQuery {
 
 #[derive(Debug, Serialize)]
 pub struct ProcessData {
-    pid: String,
-    process_path: String,
-    cpu_usage: f64,
-    memory: f64,
-    disk_usage: u64,
+    pub pid: u32,
+    pub process_path: String,
+    pub cpu_usage: f64,
+    pub memory: f64,
+    pub disk_usage: u64,
 }
 
 #[derive(Debug, Serialize)]
@@ -52,9 +52,9 @@ impl SystemQuery {
                     None => String::from("unknown"),
                 };
                 return ProcessData {
-                    pid: pid.to_string(),
+                    pid: pid.as_u32(),
                     process_path: fixed_process_path,
-                    cpu_usage: process.cpu_usage() as f64,
+                    cpu_usage: process.cpu_usage() as f64 / self.system.cpus().len() as f64,
                     memory: process.memory() as f64 / 1000.0,
                     disk_usage: process.disk_usage().read_bytes,
                 };
