@@ -53,6 +53,7 @@ const App = () => {
         data={systemQuery.processes_data}
         tableConfig={systemQuery.table_config}
         setTableConfig={send}
+        totalProcesses={systemQuery.total_processes}
       />
     </div>
   );

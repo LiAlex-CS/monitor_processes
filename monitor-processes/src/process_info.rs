@@ -7,7 +7,7 @@ pub struct SystemQuery {
     total_memory: u64,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct ProcessData {
     pub pid: u32,
     pub process_path: String,

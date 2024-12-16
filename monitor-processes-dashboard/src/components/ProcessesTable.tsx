@@ -5,6 +5,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import TablePagination from "@mui/material/TablePagination";
 
 import Container from "./Container";
 import { getPercentage } from "../services/getPercentage";
@@ -86,6 +87,7 @@ const ProcessesTableHead = ({
               direction={
                 tableConfig.order_by === header.id ? tableConfig.order : "asc"
               }
+              sx={{ stroke: "white", fill: "white" }}
             >
               <span className="text-white font-semibold">{header.name}</span>
             </TableSortLabel>
@@ -98,6 +100,7 @@ const ProcessesTableHead = ({
 
 type ProcessesTableProps = {
   data: ProcessData[];
+  totalProcesses: number;
   tableConfig: TableConfig;
   setTableConfig: (
     data: string | ArrayBufferLike | Blob | ArrayBufferView
@@ -106,9 +109,28 @@ type ProcessesTableProps = {
 
 const ProcessesTable = ({
   data,
+  totalProcesses,
   tableConfig,
   setTableConfig,
 }: ProcessesTableProps) => {
+  const createNewConfigFromPagination = (
+    newPage: number,
+    currentTableConfig: TableConfig
+  ) => {
+    const currentOrderBy = currentTableConfig.order_by;
+    const currentOrder = currentTableConfig.order;
+    const currentPage = currentTableConfig.page;
+
+    let newTableConfig: TableConfig = {
+      order_by: currentOrderBy,
+      order: currentOrder,
+      page: currentPage,
+    };
+
+    newTableConfig.page = newPage;
+    return newTableConfig;
+  };
+
   return (
     <Container>
       <TableContainer>
@@ -149,6 +171,21 @@ const ProcessesTable = ({
           </TableBody>
         </Table>
       </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[]}
+        component="div"
+        count={totalProcesses}
+        rowsPerPage={15}
+        page={tableConfig.page}
+        onPageChange={(_, newPage) => {
+          const newTableConfig = createNewConfigFromPagination(
+            newPage,
+            tableConfig
+          );
+          setTableConfig(JSON.stringify(newTableConfig));
+        }}
+        sx={{ stroke: "white", fill: "white", color: "white" }}
+      />
     </Container>
   );
 };

@@ -48,6 +48,7 @@ type SystemQuery = {
   cpu_usage_buffer: Buffer;
   memory_usage_buffer: Buffer;
   table_config: TableConfig;
+  total_processes: number;
 };
 
 export const useSystemQuery = (webSocketPath = "ws://127.0.0.1:8080") => {
