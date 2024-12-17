@@ -1,0 +1,19 @@
+{
+  "name": "monitor-processes",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "sh ./build.sh",
+    "start": "npm run build && cargo run --manifest-path ./monitor-processes/Cargo.toml"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LiAlex-CS/monitor_processes.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LiAlex-CS/monitor_processes/issues"
+  },
+  "homepage": "https://github.com/LiAlex-CS/monitor_processes#readme"
+}

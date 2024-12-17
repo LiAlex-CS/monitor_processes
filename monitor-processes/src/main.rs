@@ -85,6 +85,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let listener = TcpListener::bind(addr).await?;
     println!("WebSocket server running at ws://{}", addr);
 
+    tokio::spawn(async move {
+        let dist_folder = warp::fs::dir("dashboard_dist");
+
+        // Start the warp server on localhost:3030
+        println!("Serving at port 3030");
+        warp::serve(dist_folder).run(([0, 0, 0, 0], 3030)).await;
+    });
+
     while let Ok((stream, _)) = listener.accept().await {
         tokio::spawn(async move {
             // Accept the WebSocket connection
@@ -116,11 +124,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     interval.tick().await;
 
                     let mut table_config = table_config_rx.borrow_and_update().clone();
-
-                    println!(
-                        "table config: {}, {}, {}",
-                        table_config.order_by, table_config.order, table_config.page
-                    );
 
                     let mut processes_data = system_query.get_system_processes_data();
 
