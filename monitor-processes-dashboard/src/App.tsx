@@ -5,7 +5,9 @@ import { useSystemQuery } from "./hooks/useSystemQuery";
 import { getPercentage } from "./services/getPercentage";
 
 const App = () => {
-  const [systemQuery, send] = useSystemQuery();
+  const [systemQuery, send] = useSystemQuery(
+    `ws://${import.meta.env.VITE_DEVICE_IP}:8080`
+  );
 
   if (!systemQuery || !send) {
     return (

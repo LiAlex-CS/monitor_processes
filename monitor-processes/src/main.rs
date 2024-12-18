@@ -81,7 +81,7 @@ fn create_message(
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Bind the WebSocket server to an address
-    let addr = "127.0.0.1:8080";
+    let addr = "0.0.0.0:8080";
     let listener = TcpListener::bind(addr).await?;
     println!("WebSocket server running at ws://{}", addr);
 

@@ -5,7 +5,8 @@
   "scripts": {
     "build": "sh ./build.sh",
     "install": "sh ./install.sh",
-    "start": "npm run build && cargo run --manifest-path ./monitor-processes/Cargo.toml"
+    "start": "npm run build && cargo run --manifest-path ./monitor-processes/Cargo.toml",
+    "set_device_ip": "sh ./set_device_ip.sh"
   },
   "repository": {
     "type": "git",

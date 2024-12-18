@@ -51,7 +51,7 @@ type SystemQuery = {
   total_processes: number;
 };
 
-export const useSystemQuery = (webSocketPath = "ws://127.0.0.1:8080") => {
+export const useSystemQuery = (webSocketPath: string) => {
   const [data, setData] = useState<SystemQuery | undefined>();
 
   const wsRef = useRef<WebSocket | null>(null);
