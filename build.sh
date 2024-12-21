@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 echo "Setting Device IP Address..."
 npm run set_device_ip
 
