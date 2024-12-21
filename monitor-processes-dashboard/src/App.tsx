@@ -5,9 +5,7 @@ import { useSystemQuery } from "./hooks/useSystemQuery";
 import { getPercentage } from "./services/getPercentage";
 
 const App = () => {
-  const [systemQuery, send] = useSystemQuery(
-    `ws://${import.meta.env.VITE_DEVICE_IP}:8080`
-  );
+  const [systemQuery, send] = useSystemQuery(import.meta.env.VITE_DEVICE_IP);
 
   if (!systemQuery || !send) {
     return (
@@ -55,6 +53,7 @@ const App = () => {
         data={systemQuery.processes_data}
         tableConfig={systemQuery.table_config}
         setTableConfig={send}
+        totalSearchedProcesses={systemQuery.total_searched_processes}
         totalProcesses={systemQuery.total_processes}
       />
     </div>

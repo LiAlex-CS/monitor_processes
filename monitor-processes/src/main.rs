@@ -20,6 +20,7 @@ struct TableConfig {
     order_by: String,
     order: String,
     page: u32,
+    search: String,
 }
 
 #[derive(Serialize, Clone)]
@@ -46,6 +47,7 @@ struct OutputMessage {
     memory_usage_buffer: Buffer<UsageStamp>,
     table_config: TableConfig,
     total_processes: usize,
+    total_searched_processes: usize,
 }
 
 fn create_message(
@@ -55,6 +57,7 @@ fn create_message(
     memory_usage_buffer: Buffer<UsageStamp>,
     table_config: TableConfig,
     total_processes: usize,
+    total_searched_processes: usize,
 ) -> serde_json::Result<String> {
     let device_details = DeviceDetails {
         architecture: arch().to_string(),
@@ -72,6 +75,7 @@ fn create_message(
         memory_usage_buffer: memory_usage_buffer,
         table_config: table_config,
         total_processes: total_processes,
+        total_searched_processes: total_searched_processes,
     };
 
     let serialized_json_message = serde_json::to_string(&output_message)?;
@@ -107,6 +111,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 order_by: String::from("process_data"),
                 order: String::from("asc"),
                 page: 0,
+                search: String::from(""),
             };
 
             let (table_config_tx, mut table_config_rx) = watch::channel(default_table_config);
@@ -124,6 +129,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     interval.tick().await;
 
                     let mut table_config = table_config_rx.borrow_and_update().clone();
+
+                    println!(
+                        "table config: {}, {}, {}, {}",
+                        table_config.order_by,
+                        table_config.order,
+                        table_config.page,
+                        table_config.search
+                    );
 
                     let mut processes_data = system_query.get_system_processes_data();
 
@@ -176,21 +189,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                     let total_processes = processes_data.len();
 
-                    let max_pages = (total_processes + processes_per_page as usize - 1)
-                        / (processes_per_page as usize);
+                    let search_filtered_processes: Vec<ProcessData> = processes_data
+                        .drain(..)
+                        .filter(|process_data| {
+                            process_data
+                                .process_path
+                                .contains(table_config.search.as_str())
+                        })
+                        .collect();
+
+                    let total_search_filtered_processes = search_filtered_processes.len();
+
+                    let max_pages = (total_search_filtered_processes as f64
+                        / processes_per_page as f64)
+                        .ceil() as usize;
 
                     if table_config.page > max_pages as u32 {
-                        table_config.page = max_pages as u32
+                        table_config.page = (max_pages - 1) as u32
                     }
 
                     let start_process_index = (table_config.page * processes_per_page) as usize;
                     let end_process_index = std::cmp::min(
                         ((table_config.page + 1) * processes_per_page) as usize,
-                        total_processes,
+                        total_search_filtered_processes,
                     );
 
-                    let filtered_processes =
-                        processes_data[start_process_index..end_process_index].to_vec();
+                    let search_and_page_filtered_processes =
+                        search_filtered_processes[start_process_index..end_process_index].to_vec();
 
                     let total_system_data = system_query.get_total_processes_data();
 
@@ -211,12 +236,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     memory_usage_buffer.push(memory_usage_stamp);
 
                     let output_message = create_message(
-                        filtered_processes,
+                        search_and_page_filtered_processes,
                         total_system_data,
                         cpu_usage_buffer.clone(),
                         memory_usage_buffer.clone(),
                         table_config,
                         total_processes,
+                        total_search_filtered_processes,
                     )
                     .unwrap();
                     if let Err(e) = ws_sink.send(Message::text(output_message)).await {

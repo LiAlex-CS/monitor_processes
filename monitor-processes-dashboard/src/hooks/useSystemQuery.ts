@@ -38,6 +38,7 @@ export type TableConfig = {
   order_by: keyof ProcessData;
   order: Order;
   page: number;
+  search: string;
 };
 
 type SystemQuery = {
@@ -49,15 +50,16 @@ type SystemQuery = {
   memory_usage_buffer: Buffer;
   table_config: TableConfig;
   total_processes: number;
+  total_searched_processes: number;
 };
 
-export const useSystemQuery = (webSocketPath: string) => {
+export const useSystemQuery = (deviceIP = "127.0.0.1") => {
   const [data, setData] = useState<SystemQuery | undefined>();
 
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket(webSocketPath);
+    const ws = new WebSocket(`ws://${deviceIP}:8080`);
 
     ws.onopen = () => {
       console.log("Connected to WebSocket server");
